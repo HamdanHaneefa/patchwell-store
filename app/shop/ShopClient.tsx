@@ -47,6 +47,15 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
       if (selectedPriceRange === 'over-25' && price <= 25) {
         return false;
       }
+      if (selectedPriceRange === 'under-200' && price >= 200) {
+        return false;
+      }
+      if (selectedPriceRange === '200-500' && (price < 200 || price > 500)) {
+        return false;
+      }
+      if (selectedPriceRange === 'over-500' && price <= 500) {
+        return false;
+      }
 
       // 3. Sale filter
       if (showOnlySale && !product.isOnSale) {
@@ -80,6 +89,7 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
             showOnlySale={showOnlySale}
             onShowOnlySaleChange={setShowOnlySale}
             onClearFilters={handleClearFilters}
+            currencyCode={initialProducts[0]?.currencyCode || 'INR'}
           />
 
           <main style={{ width: '100%' }}>

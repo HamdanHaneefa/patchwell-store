@@ -16,7 +16,7 @@ const badges = [
   {
     icon: <Truck size={24} />,
     title: 'Free Shipping',
-    desc: 'On all orders over $50.',
+    desc: 'On all orders over ₹999.',
   },
   {
     icon: <RotateCcw size={24} />,

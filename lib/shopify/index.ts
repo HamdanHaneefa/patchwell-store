@@ -153,9 +153,9 @@ const MOCK_PRODUCTS: Product[] = [
     title: 'Dream Sleep Patch (Magnesium & Melatonin)',
     description: 'Unwind and fall asleep naturally with our slow-release magnesium and melatonin patches. Designed to support deep, restful sleep and wake up refreshed without morning grogginess.',
     descriptionHtml: '<p>Unwind and fall asleep naturally with our slow-release magnesium and melatonin patches. Designed to support deep, restful sleep and wake up refreshed without morning grogginess.</p><h5>Key Benefits:</h5><ul><li>Promotes rapid sleep onset</li><li>Improves sleep quality & duration</li><li>Wake up refreshed, not groggy</li><li>100% drug-free & non-habit forming</li></ul>',
-    price: '19.99',
-    compareAtPrice: '24.99',
-    currencyCode: 'USD',
+    price: '299.00',
+    compareAtPrice: '399.00',
+    currencyCode: 'INR',
     featuredImage: {
       url: 'https://images.unsplash.com/photo-1511295742364-92767fa62d9f?w=600&auto=format&fit=crop',
       altText: 'Dream Sleep Patch',
@@ -181,8 +181,8 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_dream_30',
         title: '30-Pack (1 Month Supply)',
         availableForSale: true,
-        price: { amount: '19.99', currencyCode: 'USD' },
-        compareAtPrice: { amount: '24.99', currencyCode: 'USD' },
+        price: { amount: '299.00', currencyCode: 'INR' },
+        compareAtPrice: { amount: '399.00', currencyCode: 'INR' },
         selectedOptions: [{ name: 'Pack Size', value: '30-Pack' }],
         image: null,
       },
@@ -190,8 +190,8 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_dream_60',
         title: '60-Pack (2 Month Supply)',
         availableForSale: true,
-        price: { amount: '34.99', currencyCode: 'USD' },
-        compareAtPrice: { amount: '49.99', currencyCode: 'USD' },
+        price: { amount: '499.00', currencyCode: 'INR' },
+        compareAtPrice: { amount: '699.00', currencyCode: 'INR' },
         selectedOptions: [{ name: 'Pack Size', value: '60-Pack' }],
         image: null,
       }
@@ -208,9 +208,9 @@ const MOCK_PRODUCTS: Product[] = [
     title: 'Energy Boost Patch (Extra Strong B12)',
     description: 'Ditch the sugary energy drinks and jittery caffeine crashes. Get clean, sustained, day-long focus and stamina with transdermal Vitamin B12, CoQ10, and Green Tea Extract.',
     descriptionHtml: '<p>Ditch the sugary energy drinks and jittery caffeine crashes. Get clean, sustained, day-long focus and stamina with transdermal Vitamin B12, CoQ10, and Green Tea Extract.</p><h5>Key Benefits:</h5><ul><li>Sustained 8-hour clean energy release</li><li>Zero sugar, zero calories, zero crashes</li><li>Supports nervous system health</li><li>Enhances physical stamina</li></ul>',
-    price: '21.99',
+    price: '349.00',
     compareAtPrice: null,
-    currencyCode: 'USD',
+    currencyCode: 'INR',
     featuredImage: {
       url: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?w=600&auto=format&fit=crop',
       altText: 'Energy Boost Patch',
@@ -230,7 +230,7 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_energy_30',
         title: '30-Pack (1 Month Supply)',
         availableForSale: true,
-        price: { amount: '21.99', currencyCode: 'USD' },
+        price: { amount: '349.00', currencyCode: 'INR' },
         compareAtPrice: null,
         selectedOptions: [{ name: 'Pack Size', value: '30-Pack' }],
         image: null,
@@ -248,9 +248,9 @@ const MOCK_PRODUCTS: Product[] = [
     title: 'Focus State Patch (Cognitive Support)',
     description: 'Unlock maximum productivity. Enhance cognitive function, mental clarity, and attention span. Infused with Ginkgo Biloba, L-Theanine, and Bacopa Monnieri.',
     descriptionHtml: '<p>Unlock maximum productivity. Enhance cognitive function, mental clarity, and attention span. Infused with Ginkgo Biloba, L-Theanine, and Bacopa Monnieri.</p><h5>Key Benefits:</h5><ul><li>Improves concentration and learning</li><li>Reduces mental fatigue during work/study</li><li>Promotes alpha brain waves for flow state</li><li>Fast acting transdermal absorption</li></ul>',
-    price: '22.99',
-    compareAtPrice: '29.99',
-    currencyCode: 'USD',
+    price: '399.00',
+    compareAtPrice: '499.00',
+    currencyCode: 'INR',
     featuredImage: {
       url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop',
       altText: 'Focus State Patch',
@@ -270,8 +270,8 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_focus_30',
         title: '30-Pack (1 Month Supply)',
         availableForSale: true,
-        price: { amount: '22.99', currencyCode: 'USD' },
-        compareAtPrice: { amount: '29.99', currencyCode: 'USD' },
+        price: { amount: '399.00', currencyCode: 'INR' },
+        compareAtPrice: { amount: '499.00', currencyCode: 'INR' },
         selectedOptions: [{ name: 'Pack Size', value: '30-Pack' }],
         image: null,
       }
@@ -288,9 +288,9 @@ const MOCK_PRODUCTS: Product[] = [
     title: 'Stress Down Patch (Calm & Balance)',
     description: 'Soothe daily anxiety and keep your cortisol in check. Features natural GABA, Ashwagandha, and L-Theanine to keep you feeling relaxed, centered, and balanced throughout the day.',
     descriptionHtml: '<p>Soothe daily anxiety and keep your cortisol in check. Features natural GABA, Ashwagandha, and L-Theanine to keep you feeling relaxed, centered, and balanced throughout the day.</p><h5>Key Benefits:</h5><ul><li>Relieves stress and daily anxiety</li><li>Lowers cortisol levels naturally</li><li>Supports mental stability and calm</li><li>Non-drowsy, relaxing formula</li></ul>',
-    price: '18.99',
+    price: '299.00',
     compareAtPrice: null,
-    currencyCode: 'USD',
+    currencyCode: 'INR',
     featuredImage: {
       url: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=600&auto=format&fit=crop',
       altText: 'Stress Down Patch',
@@ -310,7 +310,7 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_stress_30',
         title: '30-Pack (1 Month Supply)',
         availableForSale: true,
-        price: { amount: '18.99', currencyCode: 'USD' },
+        price: { amount: '299.00', currencyCode: 'INR' },
         compareAtPrice: null,
         selectedOptions: [{ name: 'Pack Size', value: '30-Pack' }],
         image: null,
@@ -328,9 +328,9 @@ const MOCK_PRODUCTS: Product[] = [
     title: 'Berberine Upgraded GLP-1 Patch (Metabolism)',
     description: 'Optimize your metabolic rate, support blood sugar levels, and control cravings. Formulated with high-strength Berberine, Chromium Picolinate, and Green Tea Extract.',
     descriptionHtml: '<p>Optimize your metabolic rate, support blood sugar levels, and control cravings. Formulated with high-strength Berberine, Chromium Picolinate, and Green Tea Extract.</p><h5>Key Benefits:</h5><ul><li>Supports metabolic rate and fat loss</li><li>Regulates appetite and cravings naturally</li><li>Supports healthy blood sugar levels</li><li>Direct transdermal delivery bypasses stomach irritation</li></ul>',
-    price: '29.99',
-    compareAtPrice: '39.99',
-    currencyCode: 'USD',
+    price: '499.00',
+    compareAtPrice: '699.00',
+    currencyCode: 'INR',
     featuredImage: {
       url: 'https://images.unsplash.com/photo-1611070973770-b1a672610042?w=600&auto=format&fit=crop',
       altText: 'Berberine Upgraded GLP-1 Patch',
@@ -350,8 +350,8 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_berberine_30',
         title: '30-Pack (1 Month Supply)',
         availableForSale: true,
-        price: { amount: '29.99', currencyCode: 'USD' },
-        compareAtPrice: { amount: '39.99', currencyCode: 'USD' },
+        price: { amount: '499.00', currencyCode: 'INR' },
+        compareAtPrice: { amount: '699.00', currencyCode: 'INR' },
         selectedOptions: [{ name: 'Pack Size', value: '30-Pack' }],
         image: null,
       }
@@ -368,9 +368,9 @@ const MOCK_PRODUCTS: Product[] = [
     title: 'Collagen Glow Patch (Beauty Boost)',
     description: 'Promote youthful skin elasticity, deep hydration, and glowing radiance from the inside out. Delivers slow-release marine collagen, Hyaluronic Acid, and Biotin directly to your system.',
     descriptionHtml: '<p>Promote youthful skin elasticity, deep hydration, and glowing radiance from the inside out. Delivers slow-release marine collagen, Hyaluronic Acid, and Biotin directly to your system.</p><h5>Key Benefits:</h5><ul><li>Supports skin elasticity and firmness</li><li>Reduces the appearance of fine lines</li><li>Strengthens hair and nails</li><li>Sustained release over 12 hours</li></ul>',
-    price: '24.99',
+    price: '399.00',
     compareAtPrice: null,
-    currencyCode: 'USD',
+    currencyCode: 'INR',
     featuredImage: {
       url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop',
       altText: 'Collagen Glow Patch',
@@ -390,7 +390,7 @@ const MOCK_PRODUCTS: Product[] = [
         id: 'var_collagen_30',
         title: '30-Pack (1 Month Supply)',
         availableForSale: true,
-        price: { amount: '24.99', currencyCode: 'USD' },
+        price: { amount: '399.00', currencyCode: 'INR' },
         compareAtPrice: null,
         selectedOptions: [{ name: 'Pack Size', value: '30-Pack' }],
         image: null,
@@ -456,7 +456,7 @@ function getMockCart(cartId: string): Cart | null {
       totalQuantity: 0,
       totalAmount: '0.00',
       subtotalAmount: '0.00',
-      currencyCode: 'USD',
+      currencyCode: 'INR',
       items: [],
     };
   }
@@ -659,7 +659,7 @@ export async function createCart(
       totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
       totalAmount: subtotal,
       subtotalAmount: subtotal,
-      currencyCode: 'USD',
+      currencyCode: 'INR',
       items,
     };
 
@@ -864,10 +864,10 @@ export async function removeFromCart(
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
-export function formatPrice(amount: string, currencyCode: string = 'USD'): string {
+export function formatPrice(amount: string, currencyCode: string = 'INR'): string {
   const parsed = parseFloat(amount);
-  if (isNaN(parsed)) return '$0.00';
-  return new Intl.NumberFormat('en-US', {
+  if (isNaN(parsed)) return '₹0.00';
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: currencyCode,
   }).format(parsed);

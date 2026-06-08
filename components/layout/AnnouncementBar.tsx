@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 const messages = [
-  '🌿 Free shipping on orders over $50',
+  '🌿 Free shipping on orders over ₹999',
   '✨ Subscribe & Save 20% on every order',
   '💚 100% Natural & Drug-Free',
   '⭐ Clinically tested ingredients',

@@ -66,7 +66,7 @@ export default function ProductInfo({
 
       {/* Description Short */}
       <p style={{ fontSize: '0.95rem', color: 'var(--color-text-muted)', lineHeight: 1.65 }}>
-        {description}
+        {description ? description.replace(/\uFFFD/g, ' ').replace(/\s+/g, ' ') : ''}
       </p>
 
       {/* Interactive elements rendered as children (Variant Selector, Qty, Add button) */}
@@ -80,7 +80,7 @@ export default function ProductInfo({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Truck size={16} style={{ color: 'var(--color-accent)' }} />
-          <span><strong>Free Shipping:</strong> Automatically applied to orders over $50.</span>
+          <span><strong>Free Shipping:</strong> Automatically applied to orders over {currencyCode === 'INR' ? '₹999' : '$50'}.</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <RotateCcw size={16} style={{ color: 'var(--color-accent)' }} />
@@ -92,7 +92,7 @@ export default function ProductInfo({
       {descriptionHtml && (
         <div
           className="product-detail__description"
-          dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+          dangerouslySetInnerHTML={{ __html: descriptionHtml.replace(/\uFFFD/g, ' ') }}
         />
       )}
     </div>

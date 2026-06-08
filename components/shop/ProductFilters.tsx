@@ -8,6 +8,7 @@ interface ProductFiltersProps {
   showOnlySale: boolean;
   onShowOnlySaleChange: (show: boolean) => void;
   onClearFilters: () => void;
+  currencyCode?: string;
 }
 
 export default function ProductFilters({
@@ -18,6 +19,7 @@ export default function ProductFilters({
   showOnlySale,
   onShowOnlySaleChange,
   onClearFilters,
+  currencyCode = 'INR',
 }: ProductFiltersProps) {
   const categories = [
     { label: 'Sleep & Calm', value: 'sleep' },
@@ -26,11 +28,12 @@ export default function ProductFilters({
     { label: 'Relaxation & Calm', value: 'calm' },
   ];
 
+  const isINR = currencyCode === 'INR';
   const priceRanges = [
     { label: 'All Prices', value: 'all' },
-    { label: 'Under $20', value: 'under-20' },
-    { label: '$20 - $25', value: '20-25' },
-    { label: 'Over $25', value: 'over-25' },
+    { label: isINR ? 'Under ₹200' : 'Under $20', value: isINR ? 'under-200' : 'under-20' },
+    { label: isINR ? '₹200 - ₹500' : '$20 - $25', value: isINR ? '200-500' : '20-25' },
+    { label: isINR ? 'Over ₹500' : 'Over $25', value: isINR ? 'over-500' : 'over-25' },
   ];
 
   return (

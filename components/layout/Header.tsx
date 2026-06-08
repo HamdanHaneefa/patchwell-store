@@ -34,8 +34,8 @@ export default function Header() {
               <Image
                 src="/images/logo.png"
                 alt="Patchwell"
-                width={120}
-                height={36}
+                width={200}
+                height={60}
                 priority
               />
             </Link>
@@ -105,13 +105,15 @@ export default function Header() {
         />
         <div className="mobile-nav__drawer">
           <div className="mobile-nav__header">
-            <Image
-              src="/images/logo.png"
-              alt="Patchwell"
-              width={120}
-              height={34}
-              style={{ height: 34, width: 'auto' }}
-            />
+            <div style={{ width: '150px', height: '45px', overflow: 'hidden', position: 'relative' }}>
+              <Image
+                src="/images/logo.png"
+                alt="Patchwell"
+                width={180}
+                height={54}
+                style={{ position: 'absolute', height: '110px', width: 'auto', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', objectFit: 'contain' }}
+              />
+            </div>
             <button
               className="header__icon-btn"
               onClick={() => setMobileOpen(false)}
