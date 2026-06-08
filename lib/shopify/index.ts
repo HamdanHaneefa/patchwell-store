@@ -108,8 +108,8 @@ function normalizeProduct(product: ShopifyProduct): Product {
     compareAtPrice: isOnSale ? compareAtPrice : null,
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
     featuredImage: product.featuredImage,
-    images: product.images.edges.map((e) => e.node),
-    variants: product.variants.edges.map((e) => e.node),
+    images: product.images?.edges ? product.images.edges.map((e) => e.node) : [],
+    variants: product.variants?.edges ? product.variants.edges.map((e) => e.node) : [],
     tags: product.tags,
     vendor: product.vendor,
     productType: product.productType,
@@ -119,19 +119,21 @@ function normalizeProduct(product: ShopifyProduct): Product {
 }
 
 function normalizeCart(cart: ShopifyCart): Cart {
-  const items: CartItem[] = cart.lines.edges.map(({ node }) => ({
-    id: node.id,
-    quantity: node.quantity,
-    variantId: node.merchandise.id,
-    productTitle: node.merchandise.product.title,
-    variantTitle: node.merchandise.title,
-    productHandle: node.merchandise.product.handle,
-    image: node.merchandise.product.featuredImage,
-    price: node.merchandise.price.amount,
-    totalPrice: node.cost.totalAmount.amount,
-    currencyCode: node.cost.totalAmount.currencyCode,
-    selectedOptions: node.merchandise.selectedOptions,
-  }));
+  const items: CartItem[] = cart.lines?.edges
+    ? cart.lines.edges.map(({ node }) => ({
+        id: node.id,
+        quantity: node.quantity,
+        variantId: node.merchandise.id,
+        productTitle: node.merchandise.product.title,
+        variantTitle: node.merchandise.title,
+        productHandle: node.merchandise.product.handle,
+        image: node.merchandise.product.featuredImage,
+        price: node.merchandise.price.amount,
+        totalPrice: node.cost.totalAmount.amount,
+        currencyCode: node.cost.totalAmount.currencyCode,
+        selectedOptions: node.merchandise.selectedOptions,
+      }))
+    : [];
 
   return {
     id: cart.id,
@@ -502,9 +504,9 @@ export async function getAllProducts(first = 24, query?: string): Promise<Produc
     }>({
       query: GET_ALL_PRODUCTS,
       variables: { first, query: query || '' },
-      cache: 'no-store',
+      cache: 'force-cache',
     });
-    return data.products.edges.map((e) => normalizeProduct(e.node));
+    return data.products?.edges ? data.products.edges.map((e) => normalizeProduct(e.node)) : [];
   } catch (err) {
     console.error('Failed to fetch products, falling back to mock data:', err);
     return MOCK_PRODUCTS.slice(0, first);
@@ -520,7 +522,7 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     const data = await shopifyFetch<{ product: ShopifyProduct | null }>({
       query: GET_PRODUCT_BY_HANDLE,
       variables: { handle },
-      cache: 'no-store',
+      cache: 'force-cache',
     });
     return data.product ? normalizeProduct(data.product) : null;
   } catch (err) {
@@ -544,9 +546,9 @@ export async function searchProducts(query: string): Promise<Product[]> {
     }>({
       query: SEARCH_PRODUCTS,
       variables: { query, first: 20 },
-      cache: 'no-store',
+      cache: 'force-cache',
     });
-    return data.products.edges.map((e) => normalizeProduct(e.node));
+    return data.products?.edges ? data.products.edges.map((e) => normalizeProduct(e.node)) : [];
   } catch (err) {
     console.error('Failed to search products, falling back to mock data:', err);
     return MOCK_PRODUCTS.filter(
@@ -571,14 +573,16 @@ export async function getAllCollections(): Promise<Collection[]> {
       query: GET_ALL_COLLECTIONS,
       variables: { first: 20 },
     });
-    return data.collections.edges.map(({ node }) => ({
-      id: node.id,
-      handle: node.handle,
-      title: node.title,
-      description: node.description,
-      image: node.image,
-      products: [],
-    }));
+    return data.collections?.edges
+      ? data.collections.edges.map(({ node }) => ({
+          id: node.id,
+          handle: node.handle,
+          title: node.title,
+          description: node.description,
+          image: node.image,
+          products: [],
+        }))
+      : [];
   } catch (err) {
     console.error('Failed to fetch collections, falling back to mock:', err);
     return MOCK_COLLECTIONS;
@@ -596,7 +600,7 @@ export async function getCollectionByHandle(handle: string): Promise<Collection 
     const data = await shopifyFetch<{ collection: ShopifyCollection | null }>({
       query: GET_COLLECTION_BY_HANDLE,
       variables: { handle, first: 24 },
-      cache: 'no-store',
+      cache: 'force-cache',
     });
     if (!data.collection) return null;
     const col = data.collection;
@@ -606,7 +610,7 @@ export async function getCollectionByHandle(handle: string): Promise<Collection 
       title: col.title,
       description: col.description,
       image: col.image,
-      products: col.products.edges.map((e) => normalizeProduct(e.node)),
+      products: col.products?.edges ? col.products.edges.map((e) => normalizeProduct(e.node)) : [],
     };
   } catch (err) {
     console.error('Failed to fetch collection, falling back to mock:', err);
