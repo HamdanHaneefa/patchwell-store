@@ -17,10 +17,7 @@ export default function CartSummary({
   onCheckout,
 }: CartSummaryProps) {
   const subtotalVal = parseFloat(subtotal);
-  const isINR = currencyCode === 'INR';
-  const shippingThreshold = isINR ? 999 : 50;
-  const shippingCost = isINR ? 99 : 5;
-  const shippingVal = subtotalVal >= shippingThreshold ? 0 : shippingCost;
+  const shippingVal = 0; // Free shipping for testing
   const totalVal = (subtotalVal + shippingVal).toFixed(2);
 
   const handleCheckoutClick = () => {
@@ -41,7 +38,7 @@ export default function CartSummary({
         <div className="cart-drawer__total-row">
           <span>Shipping</span>
           <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>
-            {subtotalVal >= shippingThreshold ? 'FREE' : formatPrice(shippingCost.toString(), currencyCode)}
+            FREE
           </span>
         </div>
         <div className="cart-drawer__total-row cart-drawer__total-row--main">

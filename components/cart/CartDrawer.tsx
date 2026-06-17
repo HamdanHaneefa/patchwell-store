@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
+import Script from 'next/script';
 import { X, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import CartItem from './CartItem';
@@ -13,6 +14,8 @@ export default function CartDrawer() {
     closeCart,
     updateQuantity,
     removeItem,
+    clearCart,
+    refreshCart,
   } = useCart();
 
   const totalQty = cart?.totalQuantity ?? 0;
@@ -29,14 +32,80 @@ export default function CartDrawer() {
     }
   };
 
-  const handleCheckout = () => {
-    if (cart?.checkoutUrl) {
-      window.location.href = cart.checkoutUrl;
+  const handleCheckout = async () => {
+    try {
+      // Validate cart to ensure prices are up to date
+      if (refreshCart) {
+        const latestCart = await refreshCart();
+        if (latestCart && latestCart.subtotalAmount !== subtotal) {
+          alert('Prices have been updated to reflect the latest store changes. Please review your cart before checking out.');
+          return; // Stop checkout flow
+        }
+      }
+
+      const subtotalVal = parseFloat(subtotal);
+      const shippingVal = 0; // Free shipping for testing
+      const totalVal = subtotalVal + shippingVal;
+
+      const amountInPaise = Math.round(totalVal * 100);
+      
+      const res = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: amountInPaise, currency: currencyCode }),
+      });
+      
+      const orderData = await res.json();
+      
+      if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Patchwell",
+        description: "Purchase",
+        order_id: orderData.order_id,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok) {
+              clearCart();
+              closeCart();
+              window.location.href = '/success';
+            } else {
+              alert('Payment verification failed: ' + verifyData.error);
+            }
+          } catch (err: any) {
+            alert('Verification error: ' + err.message);
+          }
+        },
+        theme: { color: "#3399cc" }
+      };
+
+      const rzp1 = new (window as any).Razorpay(options);
+      rzp1.on('payment.failed', function (response: any) {
+          alert('Payment failed: ' + response.error.description);
+      });
+      rzp1.open();
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
     }
   };
 
   return (
     <div className={`cart-overlay${isOpen ? ' open' : ''}`} role="dialog" aria-modal="true" aria-label="Shopping Cart">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <div className="cart-overlay__backdrop" onClick={closeCart} aria-hidden="true" />
       <div className="cart-drawer">
         {/* Header */}
@@ -86,7 +155,7 @@ export default function CartDrawer() {
                 onCheckout={handleCheckout}
               />
               <p style={{ fontSize: '0.72rem', textAlign: 'center', color: 'var(--color-text-muted)', marginTop: '4px' }}>
-                Redirecting to secure Shopify Checkout to complete payment.
+                Powered by Razorpay Secure Checkout.
               </p>
             </div>
           </>

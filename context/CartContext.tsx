@@ -28,6 +28,7 @@ interface CartContextValue {
   updateQuantity: (lineId: string, quantity: number) => Promise<void>;
   removeItem: (lineId: string) => Promise<void>;
   clearCart: () => void;
+  refreshCart: () => Promise<Cart | null>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -117,6 +118,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(CART_ID_KEY);
   }, []);
 
+  const refreshCart = useCallback(async () => {
+    if (!cart?.id) return null;
+    setIsLoading(true);
+    try {
+      const latestCart = await getCart(cart.id);
+      if (latestCart) setCart(latestCart);
+      return latestCart;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cart?.id]);
+
   return (
     <CartContext.Provider
       value={{
@@ -129,6 +142,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         removeItem,
         clearCart,
+        refreshCart,
       }}
     >
       {children}

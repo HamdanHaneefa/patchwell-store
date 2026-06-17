@@ -504,7 +504,7 @@ export async function getAllProducts(first = 24, query?: string): Promise<Produc
     }>({
       query: GET_ALL_PRODUCTS,
       variables: { first, query: query || '' },
-      cache: 'force-cache',
+      cache: 'no-store',
     });
     return data.products?.edges ? data.products.edges.map((e) => normalizeProduct(e.node)) : [];
   } catch (err) {
@@ -522,7 +522,7 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     const data = await shopifyFetch<{ product: ShopifyProduct | null }>({
       query: GET_PRODUCT_BY_HANDLE,
       variables: { handle },
-      cache: 'force-cache',
+      cache: 'no-store',
     });
     return data.product ? normalizeProduct(data.product) : null;
   } catch (err) {
@@ -546,7 +546,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     }>({
       query: SEARCH_PRODUCTS,
       variables: { query, first: 20 },
-      cache: 'force-cache',
+      cache: 'no-store',
     });
     return data.products?.edges ? data.products.edges.map((e) => normalizeProduct(e.node)) : [];
   } catch (err) {
@@ -600,7 +600,7 @@ export async function getCollectionByHandle(handle: string): Promise<Collection 
     const data = await shopifyFetch<{ collection: ShopifyCollection | null }>({
       query: GET_COLLECTION_BY_HANDLE,
       variables: { handle, first: 24 },
-      cache: 'force-cache',
+      cache: 'no-store',
     });
     if (!data.collection) return null;
     const col = data.collection;
