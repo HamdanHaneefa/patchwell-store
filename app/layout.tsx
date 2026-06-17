@@ -5,6 +5,8 @@ import AnnouncementBar from '@/components/layout/AnnouncementBar';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/cart/CartDrawer';
+// Shiprocket One-Click Checkout stylesheet (required by their SDK)
+// This must be loaded at root so it's available when the checkout popup opens.
 
 export const metadata: Metadata = {
   title: {
@@ -37,6 +39,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Shiprocket One-Click Checkout — required CSS (production) */}
+        <link
+          rel="stylesheet"
+          href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css"
+        />
+      </head>
       <body>
         <CartProvider>
           <AnnouncementBar />

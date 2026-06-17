@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { CartItem as CartItemType } from '@/lib/shopify/types';
 import { formatPrice } from '@/lib/shopify';
@@ -20,12 +19,13 @@ export default function CartItem({
   return (
     <div className="cart-item">
       {item.image ? (
-        <Image
+        <img
           src={item.image.url}
           alt={item.image.altText || item.productTitle}
           width={80}
           height={80}
           className="cart-item__image"
+          style={{ objectFit: 'cover' }}
         />
       ) : (
         <div className="cart-item__image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-3)' }}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Lock } from 'lucide-react';
+import { Lock, Loader2 } from 'lucide-react';
 import { formatPrice } from '@/lib/shopify';
 
 interface CartSummaryProps {
@@ -8,6 +8,7 @@ interface CartSummaryProps {
   currencyCode: string;
   checkoutUrl?: string;
   onCheckout?: () => void;
+  isCheckingOut?: boolean;
 }
 
 export default function CartSummary({
@@ -15,12 +16,14 @@ export default function CartSummary({
   currencyCode,
   checkoutUrl,
   onCheckout,
+  isCheckingOut = false,
 }: CartSummaryProps) {
   const subtotalVal = parseFloat(subtotal);
-  const shippingVal = 0; // Free shipping for testing
+  const shippingVal = 0; // Free shipping
   const totalVal = (subtotalVal + shippingVal).toFixed(2);
 
   const handleCheckoutClick = () => {
+    if (isCheckingOut) return;
     if (onCheckout) {
       onCheckout();
     } else if (checkoutUrl) {
@@ -50,11 +53,36 @@ export default function CartSummary({
       <button
         className="cart-drawer__checkout"
         onClick={handleCheckoutClick}
-        style={{ marginTop: 'var(--space-md)' }}
+        disabled={isCheckingOut}
+        aria-busy={isCheckingOut}
+        style={{
+          marginTop: 'var(--space-md)',
+          opacity: isCheckingOut ? 0.8 : 1,
+          cursor: isCheckingOut ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+        }}
       >
-        <Lock size={16} />
-        Secure Checkout
+        {isCheckingOut ? (
+          <>
+            <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite' }} />
+            Connecting...
+          </>
+        ) : (
+          <>
+            <Lock size={16} />
+            Secure Checkout
+          </>
+        )}
       </button>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

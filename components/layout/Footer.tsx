@@ -100,9 +100,10 @@ export default function Footer() {
           </p>
 
           <div className="footer__legal">
-            <Link href="/about" className="footer__legal-link">Privacy Policy</Link>
-            <Link href="/about" className="footer__legal-link">Terms of Service</Link>
-            <Link href="/about" className="footer__legal-link">Refund Policy</Link>
+            <Link href="/privacy-policy" className="footer__legal-link">Privacy Policy</Link>
+            <Link href="/terms-and-conditions" className="footer__legal-link">Terms & Conditions</Link>
+            <Link href="/refund-policy" className="footer__legal-link">Refund Policy</Link>
+            <Link href="/shipping-policy" className="footer__legal-link">Shipping Policy</Link>
           </div>
 
           <div className="footer__payment-icons">

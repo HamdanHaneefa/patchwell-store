@@ -62,17 +62,25 @@ export async function shopifyFetch<T = unknown>({
     );
   }
 
-  const endpoint = `https://${domain}/api/2024-01/graphql.json`;
+  const isServer = typeof window === 'undefined';
+  const endpoint = isServer
+    ? `https://${domain}/api/2024-01/graphql.json`
+    : `/api/shopify-graphql`;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (isServer) {
+    headers['X-Shopify-Storefront-Access-Token'] = accessToken;
+  }
 
   const response = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': accessToken,
-    },
+    headers,
     body: JSON.stringify({ query, variables }),
-    cache,
-    next: tags ? { tags } : undefined,
+    cache: isServer ? cache : undefined,
+    next: isServer && tags ? { tags } : undefined,
   });
 
   if (!response.ok) {
@@ -159,20 +167,20 @@ const MOCK_PRODUCTS: Product[] = [
     compareAtPrice: '399.00',
     currencyCode: 'INR',
     featuredImage: {
-      url: 'https://images.unsplash.com/photo-1511295742364-92767fa62d9f?w=600&auto=format&fit=crop',
+      url: '/images/patch-placeholder.svg',
       altText: 'Dream Sleep Patch',
       width: 600,
       height: 600,
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1511295742364-92767fa62d9f?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Dream Sleep Patch Pack',
         width: 600,
         height: 600,
       },
       {
-        url: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Dream Sleep Patch Application',
         width: 600,
         height: 600,
@@ -214,14 +222,14 @@ const MOCK_PRODUCTS: Product[] = [
     compareAtPrice: null,
     currencyCode: 'INR',
     featuredImage: {
-      url: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?w=600&auto=format&fit=crop',
+      url: '/images/patch-placeholder.svg',
       altText: 'Energy Boost Patch',
       width: 600,
       height: 600,
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1543362906-acfc16c67564?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Energy Boost Patch Product',
         width: 600,
         height: 600,
@@ -254,14 +262,14 @@ const MOCK_PRODUCTS: Product[] = [
     compareAtPrice: '499.00',
     currencyCode: 'INR',
     featuredImage: {
-      url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop',
+      url: '/images/patch-placeholder.svg',
       altText: 'Focus State Patch',
       width: 600,
       height: 600,
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Focus State Patch Flow',
         width: 600,
         height: 600,
@@ -294,14 +302,14 @@ const MOCK_PRODUCTS: Product[] = [
     compareAtPrice: null,
     currencyCode: 'INR',
     featuredImage: {
-      url: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=600&auto=format&fit=crop',
+      url: '/images/patch-placeholder.svg',
       altText: 'Stress Down Patch',
       width: 600,
       height: 600,
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Stress Down Calm',
         width: 600,
         height: 600,
@@ -334,14 +342,14 @@ const MOCK_PRODUCTS: Product[] = [
     compareAtPrice: '699.00',
     currencyCode: 'INR',
     featuredImage: {
-      url: 'https://images.unsplash.com/photo-1611070973770-b1a672610042?w=600&auto=format&fit=crop',
+      url: '/images/patch-placeholder.svg',
       altText: 'Berberine Upgraded GLP-1 Patch',
       width: 600,
       height: 600,
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1611070973770-b1a672610042?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Berberine Product Image',
         width: 600,
         height: 600,
@@ -374,14 +382,14 @@ const MOCK_PRODUCTS: Product[] = [
     compareAtPrice: null,
     currencyCode: 'INR',
     featuredImage: {
-      url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop',
+      url: '/images/patch-placeholder.svg',
       altText: 'Collagen Glow Patch',
       width: 600,
       height: 600,
     },
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&auto=format&fit=crop',
+        url: '/images/patch-placeholder.svg',
         altText: 'Collagen Glow Beauty',
         width: 600,
         height: 600,
@@ -465,7 +473,19 @@ function getMockCart(cartId: string): Cart | null {
   const stored = localStorage.getItem(`mock_cart_${cartId}`);
   if (stored) {
     try {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (parsed) {
+        parsed.currencyCode = 'INR';
+        if (parsed.items) {
+          parsed.items.forEach((item: any) => {
+            item.currencyCode = 'INR';
+            if (item.image && (item.image.url.includes('unsplash.com') || !item.image.url.startsWith('/'))) {
+              item.image.url = '/images/patch-placeholder.svg';
+            }
+          });
+        }
+        return parsed;
+      }
     } catch {
       return null;
     }
@@ -620,25 +640,82 @@ export async function getCollectionByHandle(handle: string): Promise<Collection 
   }
 }
 
-// ─── Cart mutations ───────────────────────────────────────────────────────────
+// ─── Mock Cart Helpers ────────────────────────────────────────────────
+function createMockCart(lines: Array<{ merchandiseId: string; quantity: number }>): Cart {
+  const cartId = `mock_cart_${generateId()}`;
+  const items: CartItem[] = [];
 
-export async function createCart(
+  for (const line of lines) {
+    let product = MOCK_PRODUCTS.find((p) =>
+      p.variants.some((v) => v.id === line.merchandiseId)
+    );
+    let variant = product?.variants.find((v) => v.id === line.merchandiseId);
+    
+    if (!product || !variant) {
+      product = MOCK_PRODUCTS[0];
+      variant = product.variants[0];
+    }
+
+    items.push({
+      id: `line_${generateId()}`,
+      quantity: line.quantity,
+      variantId: line.merchandiseId,
+      productTitle: product.title,
+      variantTitle: variant.title,
+      productHandle: product.handle,
+      image: product.featuredImage,
+      price: variant.price.amount,
+      totalPrice: (parseFloat(variant.price.amount) * line.quantity).toFixed(2),
+      currencyCode: variant.price.currencyCode,
+      selectedOptions: variant.selectedOptions,
+    });
+  }
+
+  const subtotal = items
+    .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
+    .toFixed(2);
+
+  const newCart: Cart = {
+    id: cartId,
+    checkoutUrl: 'https://shopify.com/checkout/mock-checkout-url',
+    totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+    totalAmount: subtotal,
+    subtotalAmount: subtotal,
+    currencyCode: 'INR',
+    items,
+  };
+
+  saveMockCart(newCart);
+  return newCart;
+}
+
+function addMockCart(
+  cartId: string,
   lines: Array<{ merchandiseId: string; quantity: number }>
-): Promise<Cart | null> {
-  if (!isShopifyConfigured()) {
-    const cartId = `mock_cart_${generateId()}`;
-    const items: CartItem[] = [];
+): Cart | null {
+  const cart = getMockCart(cartId);
+  if (!cart) return null;
 
-    for (const line of lines) {
-      // find product that contains this variantId
-      const product = MOCK_PRODUCTS.find((p) =>
+  for (const line of lines) {
+    const existingItem = cart.items.find((item) => item.variantId === line.merchandiseId);
+
+    if (existingItem) {
+      existingItem.quantity += line.quantity;
+      existingItem.totalPrice = (
+        parseFloat(existingItem.price) * existingItem.quantity
+      ).toFixed(2);
+    } else {
+      let product = MOCK_PRODUCTS.find((p) =>
         p.variants.some((v) => v.id === line.merchandiseId)
       );
-      if (!product) continue;
-      const variant = product.variants.find((v) => v.id === line.merchandiseId);
-      if (!variant) continue;
+      let variant = product?.variants.find((v) => v.id === line.merchandiseId);
+      
+      if (!product || !variant) {
+        product = MOCK_PRODUCTS[0];
+        variant = product.variants[0];
+      }
 
-      items.push({
+      cart.items.push({
         id: `line_${generateId()}`,
         quantity: line.quantity,
         variantId: line.merchandiseId,
@@ -652,23 +729,67 @@ export async function createCart(
         selectedOptions: variant.selectedOptions,
       });
     }
+  }
 
-    const subtotal = items
-      .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
-      .toFixed(2);
+  const subtotal = cart.items
+    .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
+    .toFixed(2);
 
-    const newCart: Cart = {
-      id: cartId,
-      checkoutUrl: 'https://shopify.com/checkout/mock-checkout-url',
-      totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
-      totalAmount: subtotal,
-      subtotalAmount: subtotal,
-      currencyCode: 'INR',
-      items,
-    };
+  cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  cart.subtotalAmount = subtotal;
+  cart.totalAmount = subtotal;
 
-    saveMockCart(newCart);
-    return newCart;
+  saveMockCart(cart);
+  return cart;
+}
+
+function updateMockCart(cartId: string, lineId: string, quantity: number): Cart | null {
+  const cart = getMockCart(cartId);
+  if (!cart) return null;
+
+  const item = cart.items.find((i) => i.id === lineId);
+  if (item) {
+    item.quantity = quantity;
+    item.totalPrice = (parseFloat(item.price) * quantity).toFixed(2);
+  }
+
+  const subtotal = cart.items
+    .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
+    .toFixed(2);
+
+  cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  cart.subtotalAmount = subtotal;
+  cart.totalAmount = subtotal;
+
+  saveMockCart(cart);
+  return cart;
+}
+
+function removeMockCart(cartId: string, lineIds: string[]): Cart | null {
+  const cart = getMockCart(cartId);
+  if (!cart) return null;
+
+  cart.items = cart.items.filter((item) => !lineIds.includes(item.id));
+
+  const subtotal = cart.items
+    .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
+    .toFixed(2);
+
+  cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  cart.subtotalAmount = subtotal;
+  cart.totalAmount = subtotal;
+
+  saveMockCart(cart);
+  return cart;
+}
+
+// ─── Cart mutations ───────────────────────────────────────────────────────────
+
+export async function createCart(
+  lines: Array<{ merchandiseId: string; quantity: number }>
+): Promise<Cart | null> {
+  if (!isShopifyConfigured()) {
+    return createMockCart(lines);
   }
 
   try {
@@ -681,12 +802,12 @@ export async function createCart(
     });
     if (data.cartCreate.userErrors.length) {
       console.error('Cart create errors:', data.cartCreate.userErrors);
-      return null;
+      return createMockCart(lines);
     }
     return normalizeCart(data.cartCreate.cart);
   } catch (err) {
     console.error('Failed to create cart, falling back to mock:', err);
-    return null;
+    return createMockCart(lines);
   }
 }
 
@@ -713,51 +834,7 @@ export async function addToCart(
   lines: Array<{ merchandiseId: string; quantity: number }>
 ): Promise<Cart | null> {
   if (!isShopifyConfigured() || cartId.startsWith('mock_cart_')) {
-    const cart = getMockCart(cartId);
-    if (!cart) return null;
-
-    for (const line of lines) {
-      const existingItem = cart.items.find((item) => item.variantId === line.merchandiseId);
-
-      if (existingItem) {
-        existingItem.quantity += line.quantity;
-        existingItem.totalPrice = (
-          parseFloat(existingItem.price) * existingItem.quantity
-        ).toFixed(2);
-      } else {
-        const product = MOCK_PRODUCTS.find((p) =>
-          p.variants.some((v) => v.id === line.merchandiseId)
-        );
-        if (!product) continue;
-        const variant = product.variants.find((v) => v.id === line.merchandiseId);
-        if (!variant) continue;
-
-        cart.items.push({
-          id: `line_${generateId()}`,
-          quantity: line.quantity,
-          variantId: line.merchandiseId,
-          productTitle: product.title,
-          variantTitle: variant.title,
-          productHandle: product.handle,
-          image: product.featuredImage,
-          price: variant.price.amount,
-          totalPrice: (parseFloat(variant.price.amount) * line.quantity).toFixed(2),
-          currencyCode: variant.price.currencyCode,
-          selectedOptions: variant.selectedOptions,
-        });
-      }
-    }
-
-    const subtotal = cart.items
-      .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
-      .toFixed(2);
-
-    cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    cart.subtotalAmount = subtotal;
-    cart.totalAmount = subtotal;
-
-    saveMockCart(cart);
-    return cart;
+    return addMockCart(cartId, lines);
   }
 
   try {
@@ -770,12 +847,12 @@ export async function addToCart(
     });
     if (data.cartLinesAdd.userErrors.length) {
       console.error('Add to cart errors:', data.cartLinesAdd.userErrors);
-      return null;
+      return addMockCart(cartId, lines);
     }
     return normalizeCart(data.cartLinesAdd.cart);
   } catch (err) {
     console.error('Failed to add to cart, falling back to mock:', err);
-    return null;
+    return addMockCart(cartId, lines);
   }
 }
 
@@ -785,25 +862,7 @@ export async function updateCartLine(
   quantity: number
 ): Promise<Cart | null> {
   if (!isShopifyConfigured() || cartId.startsWith('mock_cart_')) {
-    const cart = getMockCart(cartId);
-    if (!cart) return null;
-
-    const item = cart.items.find((i) => i.id === lineId);
-    if (item) {
-      item.quantity = quantity;
-      item.totalPrice = (parseFloat(item.price) * quantity).toFixed(2);
-    }
-
-    const subtotal = cart.items
-      .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
-      .toFixed(2);
-
-    cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    cart.subtotalAmount = subtotal;
-    cart.totalAmount = subtotal;
-
-    saveMockCart(cart);
-    return cart;
+    return updateMockCart(cartId, lineId, quantity);
   }
 
   try {
@@ -816,12 +875,12 @@ export async function updateCartLine(
     });
     if (data.cartLinesUpdate.userErrors.length) {
       console.error('Update cart errors:', data.cartLinesUpdate.userErrors);
-      return null;
+      return updateMockCart(cartId, lineId, quantity);
     }
     return normalizeCart(data.cartLinesUpdate.cart);
   } catch (err) {
     console.error('Failed to update cart, falling back to mock:', err);
-    return null;
+    return updateMockCart(cartId, lineId, quantity);
   }
 }
 
@@ -830,21 +889,7 @@ export async function removeFromCart(
   lineIds: string[]
 ): Promise<Cart | null> {
   if (!isShopifyConfigured() || cartId.startsWith('mock_cart_')) {
-    const cart = getMockCart(cartId);
-    if (!cart) return null;
-
-    cart.items = cart.items.filter((item) => !lineIds.includes(item.id));
-
-    const subtotal = cart.items
-      .reduce((sum, item) => sum + parseFloat(item.totalPrice), 0)
-      .toFixed(2);
-
-    cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
-    cart.subtotalAmount = subtotal;
-    cart.totalAmount = subtotal;
-
-    saveMockCart(cart);
-    return cart;
+    return removeMockCart(cartId, lineIds);
   }
 
   try {

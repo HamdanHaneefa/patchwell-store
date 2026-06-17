@@ -1,20 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useCart } from '@/context/CartContext';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import CartItem from '@/components/cart/CartItem';
 import CartSummary from '@/components/cart/CartSummary';
+import ShiprocketCheckoutMock from '@/components/cart/ShiprocketCheckoutMock';
 
 export default function CartPage() {
   const { cart, updateQuantity, removeItem, clearCart, refreshCart } = useCart();
+  const [isMockOpen, setIsMockOpen] = useState(false);
 
   const totalQty = cart?.totalQuantity ?? 0;
   const items = cart?.items ?? [];
   const subtotal = cart?.subtotalAmount ?? '0.00';
-  const currencyCode = cart?.currencyCode ?? 'USD';
+  const currencyCode = cart?.currencyCode ?? 'INR';
 
   const handleQuantityChange = async (lineId: string, currentQty: number, change: number) => {
     const newQty = currentQty + change;
@@ -25,7 +27,8 @@ export default function CartPage() {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     try {
       // Validate cart to ensure prices are up to date
       if (refreshCart) {
@@ -36,68 +39,47 @@ export default function CartPage() {
         }
       }
 
-      const subtotalVal = parseFloat(subtotal);
-      const shippingVal = 0; // Free shipping for testing
-      const totalVal = subtotalVal + shippingVal;
-
-      const amountInPaise = Math.round(totalVal * 100);
-      
-      const res = await fetch('/api/create-order', {
+      const res = await fetch('/api/shiprocket/access-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: amountInPaise, currency: currencyCode }),
+        body: JSON.stringify({
+          items,
+          subtotal,
+          currency: currencyCode,
+        }),
       });
-      
-      const orderData = await res.json();
-      
-      if (!res.ok) throw new Error(orderData.error || 'Failed to create order');
 
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "Patchwell",
-        description: "Purchase",
-        order_id: orderData.order_id,
-        handler: async function (response: any) {
-          try {
-            const verifyRes = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyRes.ok) {
-              clearCart();
-              window.location.href = '/success';
-            } else {
-              alert('Payment verification failed: ' + verifyData.error);
-            }
-          } catch (err: any) {
-            alert('Verification error: ' + err.message);
-          }
-        },
-        theme: { color: "#3399cc" }
-      };
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to generate access token');
 
-      const rzp1 = new (window as any).Razorpay(options);
-      rzp1.on('payment.failed', function (response: any) {
-          alert('Payment failed: ' + response.error.description);
-      });
-      rzp1.open();
+      const token = data.token;
+
+      if (data.is_mock) {
+        setIsMockOpen(true);
+      } else {
+        if (typeof window !== 'undefined' && (window as any).HeadlessCheckout) {
+          (window as any).HeadlessCheckout.addToCart(e, token, {
+            fallbackUrl: `${window.location.origin}/cart`,
+          });
+        } else {
+          setIsMockOpen(true);
+        }
+      }
     } catch (error: any) {
-      console.error(error);
-      alert(error.message);
+      console.error('Checkout error:', error);
+      setIsMockOpen(true);
     }
   };
 
   return (
     <div style={{ padding: 'var(--space-3xl) 0 var(--space-4xl)' }}>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <Script src="https://sdk.fastrr.com/rjs/sdk.js" strategy="lazyOnload" />
+      <ShiprocketCheckoutMock
+        isOpen={isMockOpen}
+        onClose={() => setIsMockOpen(false)}
+        subtotal={subtotal}
+        currencyCode={currencyCode}
+      />
       <div className="container">
         <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.25rem', fontWeight: 800, color: 'var(--color-dark)', marginBottom: 'var(--space-2xl)' }}>
           Shopping Cart
