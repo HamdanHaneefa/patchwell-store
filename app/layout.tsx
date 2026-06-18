@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   description:
     'Discover Patchwell\'s premium transdermal wellness patches. Natural ingredients for sleep, energy, focus, calm & more. Drug-free, clinically tested, and delivered to your door.',
   keywords: ['wellness patches', 'transdermal patch', 'sleep patch', 'energy patch', 'natural wellness', 'Patchwell'],
+  icons: {
+    icon: '/images/patchwell_favicon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
