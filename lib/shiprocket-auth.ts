@@ -18,6 +18,12 @@ export async function verifyShiprocketRequest(req: NextRequest): Promise<boolean
     return true;
   }
 
+  // To allow Shiprocket to test the link in a browser, and because catalog data 
+  // is public anyway, we bypass authentication entirely for GET requests.
+  if (req.method === 'GET') {
+    return true;
+  }
+
   const headerApiKey = req.headers.get('x-api-key') || '';
   const headerSignature = req.headers.get('x-api-hmac-sha256') || '';
 
