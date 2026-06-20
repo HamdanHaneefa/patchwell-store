@@ -73,7 +73,9 @@ export default function CartPage() {
 
   return (
     <div style={{ padding: 'var(--space-3xl) 0 var(--space-4xl)' }}>
-      <Script src="https://sdk.fastrr.com/rjs/sdk.js" strategy="lazyOnload" />
+      <link rel="stylesheet" href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css" />
+      <Script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js" strategy="lazyOnload" />
+      <input type="hidden" value={typeof window !== 'undefined' ? window.location.host : 'localhost'} id="sellerDomain"/>
       <ShiprocketCheckoutMock
         isOpen={isMockOpen}
         onClose={() => setIsMockOpen(false)}

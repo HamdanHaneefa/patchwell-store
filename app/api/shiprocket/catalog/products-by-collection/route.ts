@@ -34,6 +34,14 @@ async function handleRequest(req: NextRequest) {
       products = await getAllProducts(100);
     }
 
+    const extractId = (gid: any) => {
+      if (!gid) return null;
+      const parts = String(gid).split('/');
+      const lastPart = parts[parts.length - 1];
+      const num = parseInt(lastPart, 10);
+      return isNaN(num) ? gid : num;
+    };
+
     const mappedProducts = products.map((p: any) => {
       // Normalize variants
       const variants = (p.variants || []).map((v: any) => {
@@ -48,11 +56,11 @@ async function handleRequest(req: NextRequest) {
         }
         
         return {
-          id: v.id,
+          id: extractId(v.id),
           title: v.title,
           price: variantPrice,
           compare_at_price: variantComparePrice,
-          sku: v.sku || v.id,
+          sku: v.sku || String(extractId(v.id)),
           quantity: v.availableForSale ? 100 : 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -79,7 +87,7 @@ async function handleRequest(req: NextRequest) {
       }
 
       return {
-        id: p.id,
+        id: extractId(p.id),
         title: p.title,
         body_html: p.descriptionHtml || `<p>${p.description}</p>`,
         vendor: p.vendor || 'Patchwell',

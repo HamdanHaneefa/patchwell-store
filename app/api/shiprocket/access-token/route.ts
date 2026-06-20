@@ -20,25 +20,16 @@ export async function POST(req: NextRequest) {
 
     // Structure checkout request payload for Shiprocket
     const mappedItems = items.map((item: any) => ({
-      variant_id: item.variantId || item.id,
-      name: item.productTitle || item.title || 'Product',
+      variant_id: String(item.variantId || item.id),
       quantity: parseInt(item.quantity) || 1,
-      price: parseFloat(item.price) || 0.0,
-      sku: item.variantId || item.id,
-      image_url: item.image?.url || item.image_url || '',
     }));
 
-    const totalVal = parseFloat(subtotal) || 0.0;
-
     const requestPayload = {
-      cart: {
-        total_price: totalVal,
-        sub_total: totalVal,
-        currency: currency || 'INR',
+      cart_data: {
         items: mappedItems,
       },
       redirect_url: `${siteUrl}/success`,
-      fallback_url: `${siteUrl}/cart`,
+      timestamp: new Date().toISOString()
     };
 
     // If Shiprocket API keys are not configured, bypass and return a mock token for frontend demo mode
@@ -60,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     try {
       // Call Shiprocket Checkout Access Token API
-      const response = await fetch('https://checkout-api.shiprocket.com/v1/checkout/access-token', {
+      const response = await fetch('https://checkout-api.shiprocket.com/api/v1/access-token/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -19,8 +19,16 @@ async function handleRequest(req: NextRequest) {
 
     const shopifyCollections = await getAllCollections();
 
+    const extractId = (gid: any) => {
+      if (!gid) return null;
+      const parts = String(gid).split('/');
+      const lastPart = parts[parts.length - 1];
+      const num = parseInt(lastPart, 10);
+      return isNaN(num) ? gid : num;
+    };
+
     const mappedCollections = shopifyCollections.map((c) => ({
-      id: c.id,
+      id: extractId(c.id),
       updated_at: new Date().toISOString(),
       body_html: c.description ? `<p>${c.description}</p>` : '',
       handle: c.handle,
