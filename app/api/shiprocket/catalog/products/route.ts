@@ -19,59 +19,72 @@ async function handleProductsRequest(req: NextRequest) {
 
     const shopifyProducts = await getAllProducts(100);
 
-    const mappedProducts = shopifyProducts.map((p) => {
+    const mappedProducts = shopifyProducts.map((p: any) => {
       // Normalize variants
-      const variants = (p.variants || []).map((v) => {
-        const variantPrice = parseFloat(v.price.amount);
-        const variantComparePrice = v.compareAtPrice ? parseFloat(v.compareAtPrice.amount) : null;
+      const variants = (p.variants || []).map((v: any) => {
+        const variantPrice = typeof v.price === 'string' ? v.price : (v.price?.amount || '0.00');
+        const variantComparePrice = v.compareAtPrice ? (typeof v.compareAtPrice === 'string' ? v.compareAtPrice : v.compareAtPrice.amount) : null;
+        
+        let optionValues: any = {};
+        if (v.selectedOptions) {
+          v.selectedOptions.forEach((opt: any) => {
+            optionValues[opt.name] = opt.value;
+          });
+        }
         
         return {
           id: v.id,
           title: v.title,
           price: variantPrice,
           compare_at_price: variantComparePrice,
-          sku: v.id, // Using variant ID as SKU fallback
-          available: v.availableForSale ?? true,
-          quantity: v.availableForSale ? 100 : 0, // Fallback quantity
+          sku: v.sku || v.id,
+          quantity: v.availableForSale ? 100 : 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          taxable: true,
+          option_values: optionValues,
+          grams: 500,
+          image: p.featuredImage ? { src: p.featuredImage.url } : null,
+          weight: 1.0,
+          weight_unit: "kg"
         };
       });
 
-      const images = (p.images || []).map((img) => ({
-        url: img.url,
-        alt: img.altText || p.title,
-      }));
-
-      // If no images exist but featured image is available, add it
-      if (images.length === 0 && p.featuredImage) {
-        images.push({
-          url: p.featuredImage.url,
-          alt: p.featuredImage.altText || p.title,
-        });
+      let options: any[] = [];
+      if (p.variants && p.variants.length > 0 && p.variants[0].selectedOptions) {
+          const optionNames = p.variants[0].selectedOptions.map((o: any) => o.name);
+          optionNames.forEach((name: string) => {
+              const values = new Set();
+              p.variants.forEach((v: any) => {
+                  const opt = v.selectedOptions?.find((o: any) => o.name === name);
+                  if (opt) values.add(opt.value);
+              });
+              options.push({ name, values: Array.from(values) });
+          });
       }
-
-      const defaultPrice = parseFloat(p.price);
-      const defaultComparePrice = p.compareAtPrice ? parseFloat(p.compareAtPrice) : null;
 
       return {
         id: p.id,
-        handle: p.handle,
         title: p.title,
-        description: p.description,
-        description_html: p.descriptionHtml,
-        price: defaultPrice,
-        compare_at_price: defaultComparePrice,
-        currency: p.currencyCode || 'INR',
-        images: images,
-        variants: variants,
+        body_html: p.descriptionHtml || `<p>${p.description}</p>`,
         vendor: p.vendor || 'Patchwell',
         product_type: p.productType || 'Wellness Patches',
-        available: p.availableForSale ?? true,
+        created_at: new Date().toISOString(),
+        handle: p.handle,
+        updated_at: new Date().toISOString(),
+        tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
+        status: (p.availableForSale ?? true) ? "active" : "draft",
+        variants: variants,
+        image: p.featuredImage ? { src: p.featuredImage.url } : null,
+        options: options,
       };
     });
 
     return NextResponse.json({
-      success: true,
-      products: mappedProducts,
+      data: {
+        total: mappedProducts.length,
+        products: mappedProducts,
+      }
     });
   } catch (error: any) {
     console.error('Shiprocket catalog products error:', error);

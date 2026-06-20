@@ -21,15 +21,19 @@ async function handleRequest(req: NextRequest) {
 
     const mappedCollections = shopifyCollections.map((c) => ({
       id: c.id,
+      updated_at: new Date().toISOString(),
+      body_html: c.description ? `<p>${c.description}</p>` : '',
       handle: c.handle,
+      image: c.image?.url ? { src: c.image.url } : null,
       title: c.title,
-      description: c.description || '',
-      image_url: c.image?.url || null,
+      created_at: new Date().toISOString()
     }));
 
     return NextResponse.json({
-      success: true,
-      collections: mappedCollections,
+      data: {
+        total: mappedCollections.length,
+        collections: mappedCollections,
+      }
     });
   } catch (error: any) {
     console.error('Shiprocket catalog collections error:', error);
