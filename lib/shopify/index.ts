@@ -592,6 +592,7 @@ export async function getAllCollections(): Promise<Collection[]> {
     }>({
       query: GET_ALL_COLLECTIONS,
       variables: { first: 20 },
+      cache: 'no-store',
     });
     return data.collections?.edges
       ? data.collections.edges.map(({ node }) => ({
