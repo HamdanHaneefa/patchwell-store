@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       const parts = String(gid).split('/');
       const lastPart = parts[parts.length - 1];
       const num = parseInt(lastPart, 10);
-      return isNaN(num) ? gid : String(num);
+      return isNaN(num) ? gid : num;
     };
 
     // Structure checkout request payload per Shiprocket docs
