@@ -108,7 +108,7 @@ async function handleRequest(req: NextRequest) {
         status: (p.availableForSale ?? true) ? "active" : "draft",
         variants: variants,
         image: p.featuredImage ? { src: p.featuredImage.url } : null,
-        images: p.images ? p.images.map((img: any) => ({ src: img.url || img.src })) : (p.featuredImage ? [{ src: p.featuredImage.url }] : []),
+        images: (p.images && p.images.length > 0) ? p.images.map((img: any) => ({ src: img.url || img.src })) : (p.featuredImage ? [{ src: p.featuredImage.url }] : []),
         options: options,
       };
     });
