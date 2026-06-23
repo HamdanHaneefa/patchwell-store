@@ -30,8 +30,8 @@ async function handleProductsRequest(req: NextRequest) {
     const mappedProducts = shopifyProducts.map((p: any) => {
       // Normalize variants
       const variants = (p.variants || []).map((v: any) => {
-        const variantPrice = typeof v.price === 'string' ? v.price : (v.price?.amount || '0.00');
-        const variantComparePrice = v.compareAtPrice ? (typeof v.compareAtPrice === 'string' ? v.compareAtPrice : v.compareAtPrice.amount) : null;
+        const variantPrice = String(v.price?.amount ?? v.price ?? '0.00');
+        const variantComparePrice = v.compareAtPrice ? String(v.compareAtPrice.amount ?? v.compareAtPrice) : null;
         
         let optionValues: any = {};
         if (v.selectedOptions) {

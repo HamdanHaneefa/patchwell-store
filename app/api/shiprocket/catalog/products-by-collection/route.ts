@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCollectionByHandle, getAllProducts } from '@/lib/shopify';
+import { getCollectionByHandle, getAllProducts, getAllCollections } from '@/lib/shopify';
 import { verifyShiprocketRequest } from '@/lib/shiprocket-auth';
 import { Product } from '@/lib/shopify/types';
 
@@ -26,7 +26,16 @@ async function handleRequest(req: NextRequest) {
     }
 
     let products: Product[] = [];
-    const collection = await getCollectionByHandle(collectionParam);
+    let collection = await getCollectionByHandle(collectionParam);
+
+    // If fetching by handle failed, it might be a numeric ID. Find the collection by ID.
+    if (!collection || !collection.products || collection.products.length === 0) {
+      const allCollections = await getAllCollections();
+      const matched = allCollections.find(c => String(c.id).includes(collectionParam));
+      if (matched) {
+        collection = await getCollectionByHandle(matched.handle);
+      }
+    }
 
     if (collection && collection.products) {
       products = collection.products;
@@ -45,8 +54,8 @@ async function handleRequest(req: NextRequest) {
     const mappedProducts = products.map((p: any) => {
       // Normalize variants
       const variants = (p.variants || []).map((v: any) => {
-        const variantPrice = typeof v.price === 'string' ? v.price : (v.price?.amount || '0.00');
-        const variantComparePrice = v.compareAtPrice ? (typeof v.compareAtPrice === 'string' ? v.compareAtPrice : v.compareAtPrice.amount) : null;
+        const variantPrice = String(v.price?.amount ?? v.price ?? '0.00');
+        const variantComparePrice = v.compareAtPrice ? String(v.compareAtPrice.amount ?? v.compareAtPrice) : null;
         
         let optionValues: any = {};
         if (v.selectedOptions) {
