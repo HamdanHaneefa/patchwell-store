@@ -10,28 +10,7 @@ import CartItem from './CartItem';
 import CartSummary from './CartSummary';
 import ShiprocketCheckoutMock from './ShiprocketCheckoutMock';
 
-function ShiprocketCrashDetector() {
-  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    if (searchParams?.has('fastrr_redirect')) {
-      const overlays = document.querySelectorAll('div[id^="fastrr"], iframe[id^="fastrr"], .fastrr-overlay');
-      overlays.forEach(el => el.remove());
-      
-      alert('Shiprocket Checkout encountered an error (likely insufficient wallet balance or account setup issue). Please contact support.');
-      
-      const url = new URL(window.location.href);
-      const params = new URLSearchParams(url.search);
-      for (const key of Array.from(params.keys())) {
-        if (key.includes('fastrr')) params.delete(key);
-      }
-      url.search = params.toString();
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, [searchParams]);
-
-  return null;
-}
 
 export default function CartDrawer() {
   const {
@@ -119,9 +98,6 @@ export default function CartDrawer() {
 
   return (
     <div className={`cart-overlay${isOpen ? ' open' : ''}`} role="dialog" aria-modal="true" aria-label="Shopping Cart">
-      <React.Suspense fallback={null}>
-        <ShiprocketCrashDetector />
-      </React.Suspense>
       <ShiprocketCheckoutMock
         isOpen={isMockOpen}
         onClose={() => setIsMockOpen(false)}
