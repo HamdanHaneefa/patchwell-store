@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/images/patchwell_favicon.png',
   },
+  manifest: '/manifest.json',
   openGraph: {
     type: 'website',
     locale: 'en_US',
