@@ -34,7 +34,7 @@ async function handleRequest(req: NextRequest) {
     const mappedCollections = shopifyCollections.map((c) => ({
       id: extractId(c.id),
       updated_at: new Date().toISOString(),
-      body_html: c.description ? `<p>${c.description}</p>` : '',
+      body_html: c.description && c.description.trim() !== '' ? `<p>${c.description}</p>` : `<p>${c.title}</p>`,
       handle: c.handle,
       image: c.image?.url ? { src: c.image.url } : null,
       title: c.title,

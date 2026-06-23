@@ -103,7 +103,9 @@ async function handleRequest(req: NextRequest) {
       return {
         id: extractId(p.id),
         title: p.title,
-        body_html: p.descriptionHtml || `<p>${p.description}</p>`,
+        body_html: (p.descriptionHtml && p.descriptionHtml.trim() !== '')
+          ? p.descriptionHtml
+          : (p.description && p.description.trim() !== '' ? `<p>${p.description}</p>` : `<p>${p.title}</p>`),
         vendor: p.vendor || 'Patchwell',
         product_type: p.productType || 'Wellness Patches',
         created_at: new Date().toISOString(),
