@@ -76,7 +76,7 @@ export default function CartDrawer() {
         // Real Shiprocket One-Click Checkout
         if (typeof window !== 'undefined' && (window as any).HeadlessCheckout) {
           (window as any).HeadlessCheckout.addToCart(e, token, {
-            fallbackUrl: `${window.location.origin}/cart`,
+            fallbackUrl: window.location.href,
           });
         } else {
           // SDK not loaded yet — fall back to mock
