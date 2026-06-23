@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.SHIPROCKET_API_KEY?.trim();
     const apiSecret = process.env.SHIPROCKET_API_SECRET?.trim();
 
-    // Dynamically build redirect and fallback URLs based on request headers
+    // Dynamically build redirect URL based on request headers
     const host = req.headers.get('host') || 'localhost:3000';
     const protocol = host.includes('localhost') ? 'http' : 'https';
     const siteUrl = `${protocol}://${host}`;
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       return isNaN(num) ? gid : String(num);
     };
 
-    // Structure checkout request payload for Shiprocket
+    // Structure checkout request payload per Shiprocket docs
     const mappedItems = items.map((item: any) => ({
       variant_id: extractId(item.variantId || item.id),
       quantity: parseInt(item.quantity) || 1,
@@ -35,14 +35,16 @@ export async function POST(req: NextRequest) {
     const requestPayload = {
       cart_data: {
         items: mappedItems,
+        custom_attributes: {},
+        mobile_app: false,
       },
-      redirect_url: `${siteUrl}/success`,
-      timestamp: new Date().toISOString()
+      redirect_url: `${siteUrl}/order-success`,
+      timestamp: new Date().toISOString(),
     };
 
-    // If Shiprocket API keys are not configured, bypass and return a mock token for frontend demo mode
+    // If Shiprocket API keys are not configured, return mock token for demo mode
     if (!apiKey || !apiSecret) {
-      console.warn('Shiprocket API Key or Secret is missing. Returning a mock token for local testing/demo.');
+      console.warn('Shiprocket API Key or Secret is missing. Returning a mock token.');
       return NextResponse.json({
         token: `mock_token_${Math.random().toString(36).substring(2, 15)}`,
         is_mock: true,
@@ -71,25 +73,37 @@ export async function POST(req: NextRequest) {
 
       const responseData = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !responseData.ok) {
         console.error('Shiprocket API error response:', responseData);
-        // If API fails (e.g. invalid credentials or wallet exhausted), fallback to mock token
         return NextResponse.json({
           token: `mock_token_fail_${Math.random().toString(36).substring(2, 15)}`,
           is_mock: true,
-          error: typeof responseData === 'object' ? JSON.stringify(responseData) : 'API error',
+          error: responseData.error || JSON.stringify(responseData),
+        });
+      }
+
+      // Per docs: response is { ok: true, result: { token: "...", expires_at: "...", data: { order_id: "..." } } }
+      const token = responseData.result?.token;
+      if (!token) {
+        console.error('Shiprocket API did not return a token. Full response:', responseData);
+        return NextResponse.json({
+          token: `mock_token_notoken_${Math.random().toString(36).substring(2, 15)}`,
+          is_mock: true,
+          error: 'No token in Shiprocket response',
         });
       }
 
       return NextResponse.json({
-        token: responseData.token || responseData.access_token,
+        token: token,
         is_mock: false,
+        order_id: responseData.result?.data?.order_id,
       });
     } catch (apiError: any) {
-      console.error('Shiprocket API connection failed. Falling back to mock token:', apiError);
+      console.error('Shiprocket API connection failed:', apiError);
       return NextResponse.json({
         token: `mock_token_conn_${Math.random().toString(36).substring(2, 15)}`,
         is_mock: true,
+        error: apiError.message,
       });
     }
   } catch (error: any) {

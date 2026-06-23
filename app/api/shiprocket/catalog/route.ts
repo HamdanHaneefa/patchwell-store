@@ -17,7 +17,11 @@ async function handleProductsRequest(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const shopifyProducts = await getAllProducts(100);
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get('limit') || '100', 10);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+
+    const shopifyProducts = await getAllProducts(limit);
 
     const extractId = (gid: any) => {
       if (!gid) return null;
@@ -28,7 +32,6 @@ async function handleProductsRequest(req: NextRequest) {
     };
 
     const mappedProducts = shopifyProducts.map((p: any) => {
-      // Normalize variants
       const variants = (p.variants || []).map((v: any) => {
         const variantPrice = String(v.price?.amount ?? v.price ?? '0.00');
         const variantComparePrice = v.compareAtPrice ? String(v.compareAtPrice.amount ?? v.compareAtPrice) : null;
@@ -42,7 +45,7 @@ async function handleProductsRequest(req: NextRequest) {
         
         return {
           id: extractId(v.id),
-          title: v.title,
+          title: v.title || 'Default Title',
           price: variantPrice,
           compare_at_price: variantComparePrice,
           sku: v.sku || String(extractId(v.id)),
@@ -60,16 +63,20 @@ async function handleProductsRequest(req: NextRequest) {
 
       let options: any[] = [];
       if (p.variants && p.variants.length > 0 && p.variants[0].selectedOptions) {
-          const optionNames = p.variants[0].selectedOptions.map((o: any) => o.name);
-          optionNames.forEach((name: string) => {
-              const values = new Set();
-              p.variants.forEach((v: any) => {
-                  const opt = v.selectedOptions?.find((o: any) => o.name === name);
-                  if (opt) values.add(opt.value);
-              });
-              options.push({ name, values: Array.from(values) });
+        const optionNames = p.variants[0].selectedOptions.map((o: any) => o.name);
+        optionNames.forEach((name: string) => {
+          const values = new Set();
+          p.variants.forEach((v: any) => {
+            const opt = v.selectedOptions?.find((o: any) => o.name === name);
+            if (opt) values.add(opt.value);
           });
+          options.push({ name, values: Array.from(values) });
+        });
       }
+
+      const productImages = (p.images && p.images.length > 0)
+        ? p.images.map((img: any) => ({ src: img.url || img.src }))
+        : (p.featuredImage ? [{ src: p.featuredImage.url }] : []);
 
       return {
         id: extractId(p.id),
@@ -84,17 +91,19 @@ async function handleProductsRequest(req: NextRequest) {
         status: (p.availableForSale ?? true) ? "active" : "draft",
         variants: variants,
         image: p.featuredImage ? { src: p.featuredImage.url } : null,
-        images: (p.images && p.images.length > 0) ? p.images.map((img: any) => ({ src: img.url || img.src })) : (p.featuredImage ? [{ src: p.featuredImage.url }] : []),
+        images: productImages,
         options: options,
       };
     });
 
     return NextResponse.json({
-      total: mappedProducts.length,
-      products: mappedProducts,
+      data: {
+        total: mappedProducts.length,
+        products: mappedProducts,
+      }
     });
   } catch (error: any) {
-    console.error('Shiprocket catalog products error:', error);
+    console.error('Shiprocket catalog error:', error);
     return NextResponse.json({ success: false, error: error.message || 'Server error' }, { status: 500 });
   }
 }

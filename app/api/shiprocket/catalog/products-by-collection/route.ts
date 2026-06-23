@@ -20,6 +20,8 @@ async function handleRequest(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const collectionParam = searchParams.get('collection_id') || searchParams.get('handle') || searchParams.get('id');
+    const limit = parseInt(searchParams.get('limit') || '100', 10);
+    const page = parseInt(searchParams.get('page') || '1', 10);
 
     if (!collectionParam) {
       return NextResponse.json({ error: 'Missing collection identifier (collection_id, handle, or id)' }, { status: 400 });
@@ -40,7 +42,7 @@ async function handleRequest(req: NextRequest) {
     if (collection && collection.products) {
       products = collection.products;
     } else if (collectionParam === 'all' || collectionParam === 'all-products') {
-      products = await getAllProducts(100);
+      products = await getAllProducts(limit);
     }
 
     const extractId = (gid: any) => {
@@ -52,7 +54,6 @@ async function handleRequest(req: NextRequest) {
     };
 
     const mappedProducts = products.map((p: any) => {
-      // Normalize variants
       const variants = (p.variants || []).map((v: any) => {
         const variantPrice = String(v.price?.amount ?? v.price ?? '0.00');
         const variantComparePrice = v.compareAtPrice ? String(v.compareAtPrice.amount ?? v.compareAtPrice) : null;
@@ -66,7 +67,7 @@ async function handleRequest(req: NextRequest) {
         
         return {
           id: extractId(v.id),
-          title: v.title,
+          title: v.title || 'Default Title',
           price: variantPrice,
           compare_at_price: variantComparePrice,
           sku: v.sku || String(extractId(v.id)),
@@ -84,16 +85,20 @@ async function handleRequest(req: NextRequest) {
 
       let options: any[] = [];
       if (p.variants && p.variants.length > 0 && p.variants[0].selectedOptions) {
-          const optionNames = p.variants[0].selectedOptions.map((o: any) => o.name);
-          optionNames.forEach((name: string) => {
-              const values = new Set();
-              p.variants.forEach((v: any) => {
-                  const opt = v.selectedOptions?.find((o: any) => o.name === name);
-                  if (opt) values.add(opt.value);
-              });
-              options.push({ name, values: Array.from(values) });
+        const optionNames = p.variants[0].selectedOptions.map((o: any) => o.name);
+        optionNames.forEach((name: string) => {
+          const values = new Set();
+          p.variants.forEach((v: any) => {
+            const opt = v.selectedOptions?.find((o: any) => o.name === name);
+            if (opt) values.add(opt.value);
           });
+          options.push({ name, values: Array.from(values) });
+        });
       }
+
+      const productImages = (p.images && p.images.length > 0)
+        ? p.images.map((img: any) => ({ src: img.url || img.src }))
+        : (p.featuredImage ? [{ src: p.featuredImage.url }] : []);
 
       return {
         id: extractId(p.id),
@@ -107,15 +112,17 @@ async function handleRequest(req: NextRequest) {
         tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
         status: (p.availableForSale ?? true) ? "active" : "draft",
         variants: variants,
-        image: p.featuredImage ? { src: p.featuredImage.url } : null,
-        images: (p.images && p.images.length > 0) ? p.images.map((img: any) => ({ src: img.url || img.src })) : (p.featuredImage ? [{ src: p.featuredImage.url }] : []),
         options: options,
+        image: p.featuredImage ? { src: p.featuredImage.url } : null,
+        images: productImages,
       };
     });
 
     return NextResponse.json({
-      total: mappedProducts.length,
-      products: mappedProducts,
+      data: {
+        total: mappedProducts.length,
+        products: mappedProducts,
+      }
     });
   } catch (error: any) {
     console.error('Shiprocket catalog products-by-collection error:', error);

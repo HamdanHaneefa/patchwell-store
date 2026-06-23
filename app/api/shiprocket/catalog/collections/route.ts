@@ -17,6 +17,10 @@ async function handleRequest(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get('limit') || '100', 10);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+
     const shopifyCollections = await getAllCollections();
 
     const extractId = (gid: any) => {
@@ -38,8 +42,10 @@ async function handleRequest(req: NextRequest) {
     }));
 
     return NextResponse.json({
-      total: mappedCollections.length,
-      collections: mappedCollections,
+      data: {
+        total: mappedCollections.length,
+        collections: mappedCollections,
+      }
     });
   } catch (error: any) {
     console.error('Shiprocket catalog collections error:', error);

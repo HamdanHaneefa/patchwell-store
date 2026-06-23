@@ -1,34 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyShiprocketRequest } from '@/lib/shiprocket-auth';
 
 /**
  * POST /api/shiprocket/webhook
  *
- * Handles incoming webhooks from Shiprocket One-Click Checkout.
- * Shiprocket sends order and payment status updates here.
+ * Handles incoming order webhooks from Shiprocket One-Click Checkout.
  *
- * Payload shape (from Shiprocket docs):
- * {
- *   order_id: string,
- *   status: "CREATED" | "INITIATED" | "FAILED" | "SUCCESS",
- *   source: "web" | "m-web",
- *   payment_type: "CASH_ON_DELIVERY" | "PREPAID",
- *   payment_status: "Pending" | "Success" | "Failed",
- *   customer: { name, phone, email },
- *   shipping_address: { ... },
- *   items: [...],
- *   total_price: number,
- * }
+ * Per docs, Shiprocket POSTs order details with:
+ * - order_id, status, cart_data, shipping_address, billing_address, 
+ *   payment_type, payment_status, payments, total_amount_payable, etc.
  *
  * Shiprocket expects a 200 response. Webhooks may be sent more than once.
  */
 export async function POST(req: NextRequest) {
-  // Verify the request is genuinely from Shiprocket
-  const isValid = await verifyShiprocketRequest(req);
-  if (!isValid) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 511 });
-  }
-
   let body: any;
   try {
     body = await req.json();
@@ -41,10 +24,18 @@ export async function POST(req: NextRequest) {
     status,
     payment_type,
     payment_status,
-    customer,
+    phone,
+    email,
     shipping_address,
-    items,
-    total_price,
+    billing_address,
+    cart_data,
+    subtotal_price,
+    total_amount_payable,
+    shipping_charges,
+    fastrr_order_id,
+    payments,
+    coupon_codes,
+    total_discount,
   } = body;
 
   console.log('[Shiprocket Webhook] Received:', {
@@ -52,27 +43,28 @@ export async function POST(req: NextRequest) {
     status,
     payment_type,
     payment_status,
+    phone,
+    email,
+    fastrr_order_id,
+    total_amount_payable,
   });
 
-  // ─── Handle order lifecycle events ───────────────────────────────────────
+  // Handle order lifecycle events
   switch (status) {
-    case 'CREATED':
-    case 'INITIATED':
-      // Order has been started — no action needed yet
-      console.log(`[Shiprocket Webhook] Order ${order_id} initiated (${payment_type})`);
-      break;
-
     case 'SUCCESS':
-      // Order placed successfully — handle fulfilment here
-      console.log(`[Shiprocket Webhook] Order ${order_id} SUCCESS — payment: ${payment_status}`);
-
-      // TODO (when API keys are live): Create fulfilment in Shopify
-      // e.g. createShopifyOrder({ order_id, customer, shipping_address, items, total_price });
+      console.log(`[Shiprocket Webhook] Order ${order_id} SUCCESS — payment: ${payment_status}, amount: ${total_amount_payable}`);
+      // TODO: Create order in your database / Shopify admin
+      // TODO: Send order confirmation email to customer
       break;
 
     case 'FAILED':
       console.warn(`[Shiprocket Webhook] Order ${order_id} FAILED — payment: ${payment_status}`);
-      // TODO: Notify your team or update order status in DB
+      // TODO: Notify team about failed order
+      break;
+
+    case 'CREATED':
+    case 'INITIATED':
+      console.log(`[Shiprocket Webhook] Order ${order_id} ${status} (${payment_type})`);
       break;
 
     default:
