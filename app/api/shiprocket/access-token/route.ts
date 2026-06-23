@@ -18,9 +18,17 @@ export async function POST(req: NextRequest) {
     const protocol = host.includes('localhost') ? 'http' : 'https';
     const siteUrl = `${protocol}://${host}`;
 
+    const extractId = (gid: any) => {
+      if (!gid) return null;
+      const parts = String(gid).split('/');
+      const lastPart = parts[parts.length - 1];
+      const num = parseInt(lastPart, 10);
+      return isNaN(num) ? gid : String(num);
+    };
+
     // Structure checkout request payload for Shiprocket
     const mappedItems = items.map((item: any) => ({
-      variant_id: String(item.variantId || item.id),
+      variant_id: extractId(item.variantId || item.id),
       quantity: parseInt(item.quantity) || 1,
     }));
 
@@ -69,7 +77,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
           token: `mock_token_fail_${Math.random().toString(36).substring(2, 15)}`,
           is_mock: true,
-          error: responseData.error || 'API error',
+          error: typeof responseData === 'object' ? JSON.stringify(responseData) : 'API error',
         });
       }
 
