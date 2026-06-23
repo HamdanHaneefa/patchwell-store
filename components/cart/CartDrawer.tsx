@@ -5,6 +5,7 @@ import { useCart } from '@/context/CartContext';
 import Script from 'next/script';
 import { X, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import CartItem from './CartItem';
 import CartSummary from './CartSummary';
 import ShiprocketCheckoutMock from './ShiprocketCheckoutMock';
@@ -26,6 +27,29 @@ export default function CartDrawer() {
   const items = cart?.items ?? [];
   const subtotal = cart?.subtotalAmount ?? '0.00';
   const currencyCode = cart?.currencyCode ?? 'INR';
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check for Shiprocket crash/redirect parameters in URL
+    if (searchParams?.has('fastrr_redirect')) {
+      // 1. Remove the broken Shiprocket overlay
+      const overlays = document.querySelectorAll('div[id^="fastrr"], iframe[id^="fastrr"], .fastrr-overlay');
+      overlays.forEach(el => el.remove());
+      
+      // 2. Alert the user
+      alert('Shiprocket Checkout encountered an error (likely insufficient wallet balance or account setup issue). Please contact support.');
+      
+      // 3. Clean up the URL without reloading
+      const url = new URL(window.location.href);
+      const params = new URLSearchParams(url.search);
+      for (const key of Array.from(params.keys())) {
+        if (key.includes('fastrr')) params.delete(key);
+      }
+      url.search = params.toString();
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [searchParams]);
 
   const handleQuantityChange = async (lineId: string, currentQty: number, change: number) => {
     const newQty = currentQty + change;
