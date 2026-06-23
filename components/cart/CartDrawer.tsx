@@ -75,9 +75,7 @@ export default function CartDrawer() {
       } else {
         // Real Shiprocket One-Click Checkout
         if (typeof window !== 'undefined' && (window as any).HeadlessCheckout) {
-          (window as any).HeadlessCheckout.addToCart(e, token, {
-            fallbackUrl: window.location.href,
-          });
+          (window as any).HeadlessCheckout.addToCart(e, token);
         } else {
           // SDK not loaded yet — fall back to mock
           alert('Shiprocket SDK script not loaded yet. Make sure the script URL in layout/CartDrawer is correct.');
