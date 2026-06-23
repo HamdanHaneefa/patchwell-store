@@ -48,6 +48,7 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://checkout-ui.shiprocket.com/assets/styles/shopify.css"
         />
+        <script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js" defer></script>
       </head>
       <body>
         <CartProvider>

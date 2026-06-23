@@ -69,7 +69,9 @@ export default function CartDrawer() {
 
       if (data.is_mock) {
         // No real API keys yet — show our local checkout UI
-        setIsMockOpen(true);
+        console.error('Shiprocket API returned is_mock: true. Error:', data.error);
+        alert('Shiprocket Checkout API Error: ' + (data.error || 'Check console'));
+        // setIsMockOpen(true);
       } else {
         // Real Shiprocket One-Click Checkout
         if (typeof window !== 'undefined' && (window as any).HeadlessCheckout) {
@@ -78,12 +80,14 @@ export default function CartDrawer() {
           });
         } else {
           // SDK not loaded yet — fall back to mock
-          setIsMockOpen(true);
+          alert('Shiprocket SDK script not loaded yet. Make sure the script URL in layout/CartDrawer is correct.');
+          // setIsMockOpen(true);
         }
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      setIsMockOpen(true);
+      alert('Checkout failed: ' + error.message);
+      // setIsMockOpen(true);
     } finally {
       setIsCheckingOut(false);
     }
@@ -91,11 +95,6 @@ export default function CartDrawer() {
 
   return (
     <div className={`cart-overlay${isOpen ? ' open' : ''}`} role="dialog" aria-modal="true" aria-label="Shopping Cart">
-      {/* Shiprocket One-Click Checkout — Production SDK */}
-      <Script
-        src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js"
-        strategy="lazyOnload"
-      />
       <ShiprocketCheckoutMock
         isOpen={isMockOpen}
         onClose={() => setIsMockOpen(false)}
