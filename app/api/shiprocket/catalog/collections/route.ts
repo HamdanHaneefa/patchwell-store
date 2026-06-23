@@ -38,10 +38,8 @@ async function handleRequest(req: NextRequest) {
     }));
 
     return NextResponse.json({
-      data: {
-        total: mappedCollections.length,
-        collections: mappedCollections,
-      }
+      total: mappedCollections.length,
+      collections: mappedCollections,
     });
   } catch (error: any) {
     console.error('Shiprocket catalog collections error:', error);

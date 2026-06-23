@@ -84,15 +84,14 @@ async function handleProductsRequest(req: NextRequest) {
         status: (p.availableForSale ?? true) ? "active" : "draft",
         variants: variants,
         image: p.featuredImage ? { src: p.featuredImage.url } : null,
+        images: p.images ? p.images.map((img: any) => ({ src: img.url || img.src })) : (p.featuredImage ? [{ src: p.featuredImage.url }] : []),
         options: options,
       };
     });
 
     return NextResponse.json({
-      data: {
-        total: mappedProducts.length,
-        products: mappedProducts,
-      }
+      total: mappedProducts.length,
+      products: mappedProducts,
     });
   } catch (error: any) {
     console.error('Shiprocket catalog products error:', error);
