@@ -61,7 +61,9 @@ async function handleRequest(req: NextRequest) {
         let optionValues: any = {};
         if (v.selectedOptions) {
           v.selectedOptions.forEach((opt: any) => {
-            optionValues[opt.name] = opt.value;
+            if (opt.name !== 'Title' || opt.value !== 'Default Title') {
+              optionValues[opt.name] = opt.value;
+            }
           });
         }
         
@@ -85,12 +87,17 @@ async function handleRequest(req: NextRequest) {
 
       let options: any[] = [];
       if (p.variants && p.variants.length > 0 && p.variants[0].selectedOptions) {
-        const optionNames = p.variants[0].selectedOptions.map((o: any) => o.name);
+        const optionNames = p.variants[0].selectedOptions
+          .map((o: any) => o.name)
+          .filter((name: string) => name !== 'Title');
+        
         optionNames.forEach((name: string) => {
           const values = new Set();
           p.variants.forEach((v: any) => {
             const opt = v.selectedOptions?.find((o: any) => o.name === name);
-            if (opt) values.add(opt.value);
+            if (opt && opt.value !== 'Default Title') {
+              values.add(opt.value);
+            }
           });
           options.push({ name, values: Array.from(values) });
         });
