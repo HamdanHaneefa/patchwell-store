@@ -67,7 +67,7 @@ async function handleRequest(req: NextRequest) {
           });
         }
         
-        return {
+        const variantObj: any = {
           id: extractId(v.id),
           title: v.title || 'Default Title',
           price: variantPrice,
@@ -77,12 +77,17 @@ async function handleRequest(req: NextRequest) {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           taxable: true,
-          option_values: optionValues,
           grams: 500,
           image: p.featuredImage ? { src: p.featuredImage.url } : null,
           weight: 1.0,
           weight_unit: "kg"
         };
+
+        if (Object.keys(optionValues).length > 0) {
+          variantObj.option_values = optionValues;
+        }
+
+        return variantObj;
       });
 
       let options: any[] = [];
@@ -107,7 +112,7 @@ async function handleRequest(req: NextRequest) {
         ? p.images.map((img: any) => ({ src: img.url || img.src }))
         : (p.featuredImage ? [{ src: p.featuredImage.url }] : []);
 
-      return {
+      const productObj: any = {
         id: extractId(p.id),
         title: p.title,
         body_html: (p.descriptionHtml && p.descriptionHtml.trim() !== '')
@@ -121,10 +126,15 @@ async function handleRequest(req: NextRequest) {
         tags: Array.isArray(p.tags) ? p.tags.join(', ') : (p.tags || ''),
         status: (p.availableForSale ?? true) ? "active" : "draft",
         variants: variants,
-        options: options,
         image: p.featuredImage ? { src: p.featuredImage.url } : null,
         images: productImages,
       };
+
+      if (options.length > 0) {
+        productObj.options = options;
+      }
+
+      return productObj;
     });
 
     return NextResponse.json({
