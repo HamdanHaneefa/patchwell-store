@@ -32,22 +32,5 @@ export async function verifyShiprocketRequest(req: NextRequest): Promise<boolean
     return false;
   }
 
-  // Shiprocket only sends HMAC signatures for POST webhooks, not for GET catalog fetches
-  if (req.method !== 'GET') {
-    // Clone request to read body text safely
-    const clone = req.clone();
-    const bodyText = await clone.text();
-
-    const calculatedSignature = crypto
-      .createHmac('sha256', apiSecretEnv)
-      .update(bodyText)
-      .digest('base64');
-
-    if (calculatedSignature !== headerSignature) {
-      console.error('Shiprocket auth failed: HMAC signature mismatch');
-      return false;
-    }
-  }
-
   return true;
 }
