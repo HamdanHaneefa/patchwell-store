@@ -3,6 +3,16 @@ import { getCollectionByHandle, getAllProducts, getAllCollections } from '@/lib/
 import { verifyShiprocketRequest } from '@/lib/shiprocket-auth';
 import { Product } from '@/lib/shopify/types';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, x-api-key, x-api-hmac-sha256',
+};
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
 export async function POST(req: NextRequest) {
   return handleRequest(req);
 }
@@ -15,7 +25,10 @@ async function handleRequest(req: NextRequest) {
   try {
     const isValid = await verifyShiprocketRequest(req);
     if (!isValid) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized', data: { total: 0, products: [] } },
+        { status: 401, headers: corsHeaders }
+      );
     }
 
     const { searchParams } = new URL(req.url);
@@ -24,7 +37,10 @@ async function handleRequest(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1', 10);
 
     if (!collectionParam) {
-      return NextResponse.json({ error: 'Missing collection identifier (collection_id, handle, or id)' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Missing collection identifier (collection_id, handle, or id)', data: { total: 0, products: [] } },
+        { status: 400, headers: corsHeaders }
+      );
     }
 
     let products: Product[] = [];
@@ -142,9 +158,12 @@ async function handleRequest(req: NextRequest) {
         total: mappedProducts.length,
         products: mappedProducts,
       }
-    });
+    }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Shiprocket catalog products-by-collection error:', error);
-    return NextResponse.json({ success: false, error: error.message || 'Server error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message || 'Server error', data: { total: 0, products: [] } },
+      { status: 500, headers: corsHeaders }
+    );
   }
 }

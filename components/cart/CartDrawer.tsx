@@ -221,7 +221,7 @@ export default function CartDrawer() {
 
   const NotificationIcon = notification?.type === 'success' ? CheckCircle
     : notification?.type === 'error' ? XCircle
-    : AlertTriangle;
+      : AlertTriangle;
 
   return (
     <div className={`cart-overlay${isOpen ? ' open' : ''}`} role="dialog" aria-modal="true" aria-label="Shopping Cart">
